@@ -186,25 +186,133 @@ class CliffWalking(CliffWalkingEnv):
             return np.transpose(
                 np.array(pygame.surfarray.pixels3d(self.window_surface)), axes=(1, 0, 2)
             )
+#----------------------------------------------------
+
+def get_neighbors(state):
+    # UP = 0
+    # RIGHT = 1
+    # DOWN = 2
+    # LEFT = 3
+    if state == 0:
+        return (0, 1, 3)
+    elif state == 1:
+        return (1, 0, 2)
+    elif state == 2:
+        return (2, 1, 3)
+    elif state == 3:
+        return (3, 0, 2)
+
+
+
+
+
+def value_iteration(cliff_positions):
+    # initalize
+    V = {}
+    for state in range(48):
+        V[state] = 0.
+
+    def possible_actions(state):
+        possible_actions = []
+        for action in range(4):
+            next_state = step(state, action)
+            if next_state >= 0 and next_state < 48 :
+                possible_actions.append(action)
+        return possible_actions
+    def step(state, action):
+        if action == 0:
+            return state - 12
+        elif action == 1:
+            return state + 1
+        elif action == 2:
+            return state + 12
+        elif action == 3:
+            return state - 1
+
+    def Q(state, action):
+        sum = 0
+        for possible_action in get_neighbors(action):
+            next_state = step(state, possible_action)
+            if next_state < 0 or next_state > 47:
+                continue
+            if state in cliff_positions:
+                reward = -200
+                prob = 1.
+            elif state == 47:  #End State
+                reward = 0
+                prob = 0
+            else:
+                reward = -1
+                prob = float(1/3)
+
+            sum += prob * (float(reward) + 0.9 * V[next_state])
+
+        return sum
+        # next_state, reward, done, truncated, info = env.step(action)
+        # return float(info['prob']) * (float(reward) + 0.9 * V[next_state])
+
+    pi = {}
+    while True:
+        newV = {}
+        for state in range(48):
+            if state == 47:
+                newV[state] = 0.
+            else:
+                newV[state] = max(Q(state, action) for action in [0, 1, 2, 3])
+
+        # checking for convergence
+        if max(abs(V[state] - newV[state]) for state in range(48)) < 1e-10 :
+            break
+        V = newV
+
+        # read out the policy
+        pi = {}
+        for state in range(48):
+            if state == 48:
+                pi[state] = 'none'
+            else:
+                pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
+        # print(cliff_positions)
+        # print(pi)
+        # print('#############')
+
+    return pi, V
+
+#----------------------------------------------------
+
+
 
 
 # Create an environment
 env = CliffWalking(render_mode="human")
 observation, info = env.reset(seed=30)
 
+cliff_positions = []
+
+for cliff_pos in env.cliff_positions:
+    cliff_positions.append(cliff_pos[0] * 12 + cliff_pos[1])
+
+pi , v = value_iteration(cliff_positions)
+print(pi , cliff_positions)
 # Define the maximum number of iterations
 max_iter_number = 1000
 
+
 for __ in range(max_iter_number):
-    # TODO: Implement the agent policy here
+        # TODO: Implement the agent policy here
     # Note: .sample() is used to sample random action from the environment's action space
 
     # Choose an action (Replace this random action with your agent's policy)
-    action = env.action_space.sample()
+    # action = env.action_space.sample()
 
-    # Perform the action and receive feedback from the environment
-    next_state, reward, done, truncated, info = env.step(action)
+    # print(env.s)
+# Perform the action and receive feedback from the environment
 
+    action = pi[env.s]
+    state = env.s
+    next_state, reward, done, truncated, info = env.step(0)
+
+    print(f'action : {action}, state : {state} , next_state : {next_state}, reward : {reward}')
     if done or truncated:
         observation, info = env.reset()
 
@@ -212,39 +320,10 @@ for __ in range(max_iter_number):
 env.close()
 
 
-# ============================================================
-def value_iteration(mdp):
-    # initalize
-    V = {}
-    for state in mdp.states():
-        V[state] = 0.
-
-    def Q(state, action):
-        return sum(prob*(reward + mdp.discount()*V[newState])\
-            for newState, prob, reward in mdp.succProbReward(state, action))
 
 
-    while True:
-
-        newV = {}
-        for state in mdp.states():
-            if mdp.isEnd(state):
-                newV[state] = 0.
-            else:
-                newV[state] = max(Q(state, action) for action in mdp.actions(state))
-
-        # checking for convergence
-        if max(abs(V[state] - newV[state]) for state in mdp.states()) < 1e-10 :
-            break
-        V = newV
-
-        # read out the policy
-        pi = {}
-        for state in mdp.states():
-            if mdp.isEnd(state):
-                pi[state] = 'none'
-            else:
-                pi[state] =max((Q(state, action),action) for action in mdp.actions(state))[1]
 
 
-    return pi, V
+
+
+
