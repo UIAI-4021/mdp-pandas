@@ -212,9 +212,9 @@ def value_iteration(cliff_positions):
 
     def possible_actions(state):
         possible_actions = []
-        for action in range(3):
+        for action in range(4):
             next_state = step(state, action)
-            if next_state > 0 and next_state < 48:
+            if next_state >= 0 and next_state < 48:
                 possible_actions.append(action)
         return possible_actions
     def step(state, action):
@@ -233,10 +233,10 @@ def value_iteration(cliff_positions):
             next_state = step(state, possible_action)
             if next_state < 0 or next_state > 47:
                 continue
-            if next_state in cliff_positions:
-                reward = -100
+            if state in cliff_positions:
+                reward = -200
                 prob = 1.
-            elif next_state == 47:  #End State
+            elif state == 47:  #End State
                 reward = 0
                 prob = 0
             else:
@@ -270,6 +270,9 @@ def value_iteration(cliff_positions):
                 pi[state] = 'none'
             else:
                 pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
+        # print(cliff_positions)
+        # print(pi)
+        # print('#############')
 
     return pi, V
 
@@ -288,7 +291,7 @@ for cliff_pos in env.cliff_positions:
     cliff_positions.append(cliff_pos[0] * 12 + cliff_pos[1])
 
 pi , v = value_iteration(cliff_positions)
-print(pi)
+print(pi , cliff_positions)
 # Define the maximum number of iterations
 max_iter_number = 1000
 
@@ -305,8 +308,9 @@ for __ in range(max_iter_number):
 
     action = pi[env.s]
 
-    next_state, reward, done, truncated, info = env.step(action)
+    next_state, reward, done, truncated, info = env.step(0)
 
+    print(f'action : {action}, env.s : {env.s} , next_state : {next_state}, reward : {reward}')
     if done or truncated:
         observation, info = env.reset()
 
