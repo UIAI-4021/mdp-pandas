@@ -204,6 +204,8 @@ def get_neighbors(state):
 
 
 
+
+
 def value_iteration(cliff_positions):
     # initalize
     V = {}
@@ -214,7 +216,7 @@ def value_iteration(cliff_positions):
         possible_actions = []
         for action in range(4):
             next_state = step(state, action)
-            if next_state >= 0 and next_state < 48:
+            if next_state >= 0 and next_state < 48 :
                 possible_actions.append(action)
         return possible_actions
     def step(state, action):
@@ -307,10 +309,10 @@ for __ in range(max_iter_number):
 # Perform the action and receive feedback from the environment
 
     action = pi[env.s]
-
+    state = env.s
     next_state, reward, done, truncated, info = env.step(0)
 
-    print(f'action : {action}, env.s : {env.s} , next_state : {next_state}, reward : {reward}')
+    print(f'action : {action}, state : {state} , next_state : {next_state}, reward : {reward}')
     if done or truncated:
         observation, info = env.reset()
 
