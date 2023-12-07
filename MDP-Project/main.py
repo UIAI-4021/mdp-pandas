@@ -218,10 +218,10 @@ def value_iteration(cliff_positions):
             next_state = step(state, action)
 
             left_side = state % 12
-            right_side = (state - 11) % 12
+            right_side = (state % 12) - 11
 
-            if not (next_state == 3 and left_side) and not (next_state == 1 and right_side):
-                if next_state >= 0 and next_state < 48 :
+            if not (action == 3 and left_side == 0) or not (action == 1 and right_side == 0):
+                if next_state >= 0 and next_state < 48:
                     possible_actions.append(action)
 
         return possible_actions
