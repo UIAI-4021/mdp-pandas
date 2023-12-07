@@ -110,7 +110,7 @@ class CliffWalking(CliffWalkingEnv):
 
             if mode == "human":
                 pygame.display.init()
-                pygame.display.set_caption("CliffWalking - Edited by Audrina & Kian")
+                pygame.display.set_caption("CliffWalking")
                 self.window_surface = pygame.display.set_mode(self.window_size)
             else:  # rgb_array
                 self.window_surface = pygame.Surface(self.window_size)
@@ -210,3 +210,41 @@ for __ in range(max_iter_number):
 
 # Close the environment
 env.close()
+
+
+# ============================================================
+def value_iteration(mdp):
+    # initalize
+    V = {}
+    for state in mdp.states():
+        V[state] = 0.
+
+    def Q(state, action):
+        return sum(prob*(reward + mdp.discount()*V[newState])\
+            for newState, prob, reward in mdp.succProbReward(state, action))
+
+
+    while True:
+
+        newV = {}
+        for state in mdp.states():
+            if mdp.isEnd(state):
+                newV[state] = 0.
+            else:
+                newV[state] = max(Q(state, action) for action in mdp.actions(state))
+
+        # checking for convergence
+        if max(abs(V[state] - newV[state]) for state in mdp.states()) < 1e-10 :
+            break
+        V = newV
+
+        # read out the policy
+        pi = {}
+        for state in mdp.states():
+            if mdp.isEnd(state):
+                pi[state] = 'none'
+            else:
+                pi[state] =max((Q(state, action),action) for action in mdp.actions(state))[1]
+
+
+    return pi, V
