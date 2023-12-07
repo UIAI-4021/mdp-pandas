@@ -191,19 +191,22 @@ class CliffWalking(CliffWalkingEnv):
 # Create an environment
 env = CliffWalking(render_mode="human")
 observation, info = env.reset(seed=30)
+print(observation)
 
 # Define the maximum number of iterations
 max_iter_number = 1000
 
 for __ in range(max_iter_number):
-    # TODO: Implement the agent policy here
+        # TODO: Implement the agent policy here
     # Note: .sample() is used to sample random action from the environment's action space
 
     # Choose an action (Replace this random action with your agent's policy)
     action = env.action_space.sample()
 
-    # Perform the action and receive feedback from the environment
+    print(env.s)
+# Perform the action and receive feedback from the environment
     next_state, reward, done, truncated, info = env.step(action)
+
 
     if done or truncated:
         observation, info = env.reset()
@@ -212,11 +215,18 @@ for __ in range(max_iter_number):
 env.close()
 
 
+
+
+
+
+
+
+
 # ============================================================
 def value_iteration(mdp):
     # initalize
     V = {}
-    for state in mdp.states():
+    for state in range(48):
         V[state] = 0.
 
     def Q(state, action):
