@@ -212,7 +212,7 @@ def set_rewards():
         row = int(state / 12)
         dist_row = abs(row - 3)
         dist_column = abs(column - 11)
-        rewards[state] = - (dist_row + dist_column)
+        rewards[state] = - 1.5 * (dist_row  + dist_column)
     return rewards
 
 def value_iteration(cliff_positions , rewards):
@@ -229,11 +229,25 @@ def value_iteration(cliff_positions , rewards):
             left_side = state % 12
             right_side = (state % 12) - 11
 
-            if not (action == 3 and left_side == 0) and not (action == 1 and right_side == 0):
-                if next_state >= 0 and next_state < 48:
+            left_corner = [0,36]
+            right_corner = [11]
+
+            if not (action == 3 and state in left_corner) and not (action == 1 and state in right_corner):
                     possible_actions.append(action)
 
         return possible_actions
+
+    def possible_actions2(state):
+        possible_actions = []
+        for action in range(4):
+            next_state = step(state, action)
+
+            left_side = state % 12
+            right_side = (state % 12) - 11
+
+            if not (action == 3 and left_side == 0) and not (action == 1 and right_side == 0):
+                if next_state >= 0 and next_state < 48:
+                    possible_actions.append(action)
     def step(state, action):
         if action == 0:
             return state - 12
@@ -247,6 +261,7 @@ def value_iteration(cliff_positions , rewards):
 
     def Q(state, action):
         sum = 0
+        flag = False
         left_side = state % 12
         right_side = (state % 12) - 11
         for possible_action in get_neighbors(action):
@@ -255,17 +270,24 @@ def value_iteration(cliff_positions , rewards):
             if (action == 3 and left_side == 0) or (action == 1 and right_side == 0) or \
                     next_state < 0 or next_state > 47:
                 continue
-            if state in cliff_positions:
-                reward = -200
+            if next_state in cliff_positions:
+                reward = -100
                 prob = float(1/3)
-            elif state == 47:  #End State
-                reward = 0
-                prob = 0
+                flag = True
+            elif next_state == 47:  #End State
+                reward = 150
+                prob = 1/3
+                flag = True
             else:
-                reward = rewards[state]
+                reward = rewards[next_state]
                 prob = float(1/3)
+                flag = True
 
-            sum += prob * (float(reward) + 0.9 * V[next_state])
+            q =  prob * (float(reward) + 0.85 * V[next_state])
+            sum += q
+
+        if not flag:
+            sum = -10
 
         return sum
         # next_state, reward, done, truncated, info = env.step(action)
@@ -277,9 +299,11 @@ def value_iteration(cliff_positions , rewards):
         newV = {}
         for state in range(48):
             if state == 47:
-                newV[state] = 0.
+                newV[state] = 150
+            elif state in cliff_positions:
+                newV[state] = -100
             else:
-                newV[state] = max(Q(state, action) for action in [0, 1, 2, 3])
+                newV[state] = max(Q(state, action) for action in possible_actions(state))
 
         # checking for convergence
         if max(abs(V[state] - newV[state]) for state in range(48)) < 1e-10 :
@@ -289,10 +313,15 @@ def value_iteration(cliff_positions , rewards):
         # read out the policy
         pi = {}
         for state in range(48):
-            if state == 48:
+            if state == 47:
                 pi[state] = 'none'
             else:
-                pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
+                l = []
+                for action in possible_actions(state):
+                    l.append((Q(state, action), action))
+                l.sort()
+                pi[state] = l[len(l)-1][1]
+                # pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
         # print(cliff_positions)
         # print(pi)
         # print('#############')
@@ -316,9 +345,9 @@ for cliff_pos in env.cliff_positions:
 rewards = set_rewards()
 
 pi , v = value_iteration(cliff_positions, rewards)
-print(f'{pi}\n{cliff_positions}\n{rewards}')
+print(f'pi : {pi}\ncliff_positions : {cliff_positions}\nrewards : {rewards}\n values : {v}')
 # Define the maximum number of iterations
-max_iter_number = 1000
+max_iter_number = 2000
 
 
 for __ in range(max_iter_number):
