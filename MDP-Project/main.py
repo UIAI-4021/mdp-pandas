@@ -212,7 +212,11 @@ def set_rewards():
         row = int(state / 12)
         dist_row = abs(row - 3)
         dist_column = abs(column - 11)
-        rewards[state] = - 1.5 * (dist_row  + dist_column)
+        if (row >= 0) and (row <= 7):
+            rewards[state] = - 1.5 * (dist_row + dist_column)
+        else:
+            rewards[state] = - 0.5 * (dist_row + dist_column)
+
     return rewards
 
 def value_iteration(cliff_positions , rewards):
