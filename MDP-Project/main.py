@@ -213,7 +213,7 @@ def set_rewards():
         dist_row = abs(row - 3)
         dist_column = abs(column - 11)
         if (row >= 0) and (row <= 7):
-            rewards[state] = - 1.5 * (dist_row + dist_column)
+            rewards[state] = - 1 * (dist_row + dist_column)
         else:
             rewards[state] = - 0.5 * (dist_row + dist_column)
 
@@ -233,10 +233,10 @@ def value_iteration(cliff_positions , rewards):
             left_side = state % 12
             right_side = (state % 12) - 11
 
-            left_corner = [0,36]
-            right_corner = [11]
+            left_corner = [0]
+            right_corner = []
 
-            if not (action == 3 and state in left_corner) and not (action == 1 and state in right_corner):
+            if not (action == 3 and state == 0) and not (action == 1 and state in right_corner):
                     possible_actions.append(action)
 
         return possible_actions
@@ -271,15 +271,14 @@ def value_iteration(cliff_positions , rewards):
         for possible_action in get_neighbors(action):
 
             next_state = step(state, possible_action)
-            if (action == 3 and left_side == 0) or (action == 1 and right_side == 0) or \
+            if (possible_action == 3 and left_side == 0) or (possible_action == 1 and right_side == 0) or \
                     next_state < 0 or next_state > 47:
                 continue
             if next_state in cliff_positions:
                 reward = -100
                 prob = float(1/3)
-                flag = True
             elif next_state == 47:  #End State
-                reward = 150
+                reward = 0
                 prob = 1/3
                 flag = True
             else:
@@ -287,11 +286,11 @@ def value_iteration(cliff_positions , rewards):
                 prob = float(1/3)
                 flag = True
 
-            q =  prob * (float(reward) + 0.85 * V[next_state])
+            q = prob * (float(reward) + 0.85 * V[next_state])
             sum += q
 
-        if not flag:
-            sum = -10
+        # if not flag:
+        #     sum = -10
 
         return sum
         # next_state, reward, done, truncated, info = env.step(action)
@@ -303,7 +302,7 @@ def value_iteration(cliff_positions , rewards):
         newV = {}
         for state in range(48):
             if state == 47:
-                newV[state] = 150
+                newV[state] = 0
             elif state in cliff_positions:
                 newV[state] = -100
             else:
@@ -351,9 +350,9 @@ rewards = set_rewards()
 pi , v = value_iteration(cliff_positions, rewards)
 print(f'pi : {pi}\ncliff_positions : {cliff_positions}\nrewards : {rewards}\n values : {v}')
 # Define the maximum number of iterations
-max_iter_number = 2000
+max_iter_number = 1000
 
-
+i = 0
 for __ in range(max_iter_number):
         # TODO: Implement the agent policy here
     # Note: .sample() is used to sample random action from the environment's action space
@@ -371,6 +370,9 @@ for __ in range(max_iter_number):
     print(f'action : {action}, state : {state} , next_state : {next_state}, reward : {reward}')
     if done or truncated:
         observation, info = env.reset()
+        if done :
+            i+=1
+print(f'i is {i}')
 
 # Close the environment
 env.close()
