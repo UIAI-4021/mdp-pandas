@@ -188,22 +188,15 @@ class CliffWalking(CliffWalkingEnv):
             )
 #----------------------------------------------------
 
-def get_neighbors(state):
-    # UP = 0
-    # RIGHT = 1
-    # DOWN = 2
-    # LEFT = 3
-    if state == 0:
+def get_neighbors(action):
+    if action == 0:
         return (0, 1, 3)
-    elif state == 1:
+    elif action == 1:
         return (1, 0, 2)
-    elif state == 2:
+    elif action == 2:
         return (2, 1, 3)
-    elif state == 3:
+    elif action == 3:
         return (3, 0, 2)
-
-
-
 
 def set_rewards():
     rewards = {}
@@ -212,7 +205,7 @@ def set_rewards():
         row = int(state / 12)
         dist_row = abs(row - 3)
         dist_column = abs(column - 11)
-        if (row >= 0) and (row <= 7):
+        if (column >= 0) and (column <= 7):
             rewards[state] = - 1 * (dist_row + dist_column)
         else:
             rewards[state] = - 0.5 * (dist_row + dist_column)
@@ -228,15 +221,8 @@ def value_iteration(cliff_positions , rewards):
     def possible_actions(state):
         possible_actions = []
         for action in range(4):
-            next_state = step(state, action)
 
-            left_side = state % 12
-            right_side = (state % 12) - 11
-
-            left_corner = [0]
-            right_corner = []
-
-            if not (action == 3 and state == 0) and not (action == 1 and state in right_corner):
+            if not (action == 3 and state == 0):
                     possible_actions.append(action)
 
         return possible_actions
@@ -252,6 +238,7 @@ def value_iteration(cliff_positions , rewards):
             if not (action == 3 and left_side == 0) and not (action == 1 and right_side == 0):
                 if next_state >= 0 and next_state < 48:
                     possible_actions.append(action)
+        return possible_actions
     def step(state, action):
         if action == 0:
             return state - 12
@@ -273,6 +260,7 @@ def value_iteration(cliff_positions , rewards):
             next_state = step(state, possible_action)
             if (possible_action == 3 and left_side == 0) or (possible_action == 1 and right_side == 0) or \
                     next_state < 0 or next_state > 47:
+                sum += -1
                 continue
             if next_state in cliff_positions:
                 reward = -100
@@ -286,11 +274,8 @@ def value_iteration(cliff_positions , rewards):
                 prob = float(1/3)
                 flag = True
 
-            q = prob * (float(reward) + 0.85 * V[next_state])
+            q = prob * (float(reward) + 0.9 * V[next_state])
             sum += q
-
-        # if not flag:
-        #     sum = -10
 
         return sum
         # next_state, reward, done, truncated, info = env.step(action)
@@ -319,12 +304,12 @@ def value_iteration(cliff_positions , rewards):
             if state == 47:
                 pi[state] = 'none'
             else:
-                l = []
-                for action in possible_actions(state):
-                    l.append((Q(state, action), action))
-                l.sort()
-                pi[state] = l[len(l)-1][1]
-                # pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
+                # l = []
+                # for action in possible_actions(state):
+                #     l.append((Q(state, action), action))
+                # l.sort()
+                # pi[state] = l[len(l)-1][1]
+                pi[state] =max((Q(state, action), action) for action in possible_actions(state))[1]
         # print(cliff_positions)
         # print(pi)
         # print('#############')
@@ -362,7 +347,6 @@ for __ in range(max_iter_number):
 
     # print(env.s)
 # Perform the action and receive feedback from the environment
-
     action = pi[env.s]
     state = env.s
     next_state, reward, done, truncated, info = env.step(action)
