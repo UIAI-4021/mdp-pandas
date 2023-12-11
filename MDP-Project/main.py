@@ -206,9 +206,9 @@ def set_rewards():
         dist_row = abs(row - 3)
         dist_column = abs(column - 11)
         if (column >= 0) and (column <= 7):
-            rewards[state] = - 1 * (dist_row + dist_column)
+            rewards[state] = - 0.3 * (dist_row + dist_column)
         else:
-            rewards[state] = - 0.5 * (dist_row + dist_column)
+            rewards[state] = - 0.2 * (dist_row + dist_column)
 
     return rewards
 
@@ -263,7 +263,7 @@ def value_iteration(cliff_positions , rewards):
                 sum += -1
                 continue
             if next_state in cliff_positions:
-                reward = -100
+                reward = -50
                 prob = float(1/3)
             elif next_state == 47:  #End State
                 reward = 0
@@ -289,7 +289,7 @@ def value_iteration(cliff_positions , rewards):
             if state == 47:
                 newV[state] = 0
             elif state in cliff_positions:
-                newV[state] = -100
+                newV[state] = -50
             else:
                 newV[state] = max(Q(state, action) for action in possible_actions(state))
 
