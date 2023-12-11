@@ -1,5 +1,7 @@
 # University of Isfahan Cliff Walking Project
 
+![animated gif](https://gymnasium.farama.org/_images/cliff_walking.gif)
+
 ## Authors
 - Melika Shirian
 - Kianoosh Vadaei
