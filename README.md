@@ -46,6 +46,6 @@ The main section creates the game environment, identifies cliff positions, and c
 Explore the fascinating world of Markov Decision Processes through the Cliff Walking Project! Feel free to customize and extend the code to further investigate AI and reinforcement learning.
 
 ## References
-- [Stanford University - Markov Decision Processes](https://web.stanford.edu/class/cs234/CS234Win2019/lectures/cs234_lecture02.pdf)
+- [Stanford University - Markov Decision Processes](https://www.youtube.com/watch?v=9g32v7bK3Co&t=4214s)
 - [OpenAI - ChatGPT](https://www.openai.com/)
 - Russell, Stuart, and Norvig, Peter. "Artificial Intelligence: A Modern Approach." (Book)
