@@ -1,6 +1,6 @@
 # University of Isfahan Cliff Walking Project
 
-![animated gif](https://gymnasium.farama.org/_images/cliff_walking.gif)
+![animated gif](https://s30.picofile.com/file/8470387642/Untitled_Project.gif)
 
 ## Authors
 - Melika Shirian
